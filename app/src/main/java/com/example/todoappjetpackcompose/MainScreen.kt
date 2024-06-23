@@ -89,7 +89,7 @@ fun MainScreen() {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(60.dp)
-                                    .padding(bottom = 5.dp),
+                                    .padding(bottom = 5.dp, start = 5.dp, end = 5.dp),
                                 shape = RoundedCornerShape(0.dp),
 
                                 onClick = { /*TODO*/ }) {
