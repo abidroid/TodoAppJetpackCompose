@@ -26,7 +26,7 @@ fun readData(context: Context): SnapshotStateList<String> {
         itemList = ois.readObject() as ArrayList<String>
 
     } catch (e: FileNotFoundException) {
-        itemList = ArrayList<String>()
+        itemList = ArrayList()
     }
 
     val items = SnapshotStateList<String>()
