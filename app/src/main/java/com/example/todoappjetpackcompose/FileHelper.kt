@@ -2,6 +2,7 @@ package com.example.todoappjetpackcompose
 
 import android.content.Context
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import java.io.FileNotFoundException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
@@ -19,13 +20,17 @@ fun writeToFile(items: SnapshotStateList<String>, context: Context) {
 fun readData(context: Context): SnapshotStateList<String> {
     var itemList: ArrayList<String>
 
-    val fis = context.openFileInput(FILE_NAME)
-    val ois = ObjectInputStream(fis)
-    itemList = ois.readObject() as ArrayList<String>
+    try {
+        val fis = context.openFileInput(FILE_NAME)
+        val ois = ObjectInputStream(fis)
+        itemList = ois.readObject() as ArrayList<String>
+
+    } catch (e: FileNotFoundException) {
+        itemList = ArrayList<String>()
+    }
 
     val items = SnapshotStateList<String>()
     items.addAll(itemList)
-    ois.close()
 
     return items
 }
