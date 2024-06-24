@@ -1,5 +1,6 @@
 package com.example.todoappjetpackcompose
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -38,8 +40,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun MainScreen() {
 
+    val myContext = LocalContext.current
     val tf = remember { mutableStateOf("") }
-    val itemsList = remember { mutableStateListOf("Learn Kotlin", "Learn Compose") }
+    val itemsList = readData(myContext)
 
     Scaffold(
         topBar = {
@@ -75,7 +78,15 @@ fun MainScreen() {
                         modifier = Modifier
                             .weight(2F)
                             .height(60.dp),
-                        onClick = { /*TODO*/ }) {
+                        onClick = {
+                            if (tf.value.isNotEmpty()) {
+                                itemsList.add(tf.value)
+                                tf.value = ""
+                                writeToFile(itemsList, myContext)
+                            } else {
+                                Toast.makeText(myContext, "Please enter something", Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
                         Text(text = "Add")
                     }
                 }
@@ -99,14 +110,15 @@ fun MainScreen() {
                                 ) {
                                     Text(
                                         modifier = Modifier.weight(8F),
-                                        text = itemsList[index])
+                                        text = itemsList[index]
+                                    )
                                     Row {
 
                                         IconButton(
                                             onClick = { /*TODO*/ }) {
                                             Icon(
                                                 imageVector = Icons.Default.Delete,
-                                                contentDescription = "Edit",
+                                                contentDescription = "Delete",
                                                 tint = Color.Red
                                             )
                                         }
