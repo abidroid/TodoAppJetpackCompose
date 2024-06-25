@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -43,6 +44,7 @@ fun MainScreen() {
     val myContext = LocalContext.current
     val tf = remember { mutableStateOf("") }
     val itemsList = readData(myContext)
+    val focusManager = LocalFocusManager.current
 
     Scaffold(
         topBar = {
@@ -83,6 +85,7 @@ fun MainScreen() {
                                 itemsList.add(tf.value)
                                 tf.value = ""
                                 writeToFile(itemsList, myContext)
+                                focusManager.clearFocus()
                             } else {
                                 Toast.makeText(myContext, "Please enter something", Toast.LENGTH_SHORT).show()
                             }
