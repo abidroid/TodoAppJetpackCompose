@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,10 +23,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,102 +49,127 @@ fun MainScreen() {
     val itemsList = readData(myContext)
     val focusManager = LocalFocusManager.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Todo App") },
-                colors = TopAppBarColors(
-                    containerColor = Color.Blue,
-                    actionIconContentColor = Color.White,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    scrolledContainerColor = Color.Blue,
-                ),
-            )
-        },
-        content = { paddingValues ->
-            Column(
+    val deleteDialogStatus = remember {
+        mutableStateOf(false)
+    }
+
+    val editDialogStatus = remember {
+        mutableStateOf(false)
+    }
+
+    val selectedIndex = remember { mutableIntStateOf(0) }
+
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text("Todo App") },
+            colors = TopAppBarColors(
+                containerColor = Color.Blue,
+                actionIconContentColor = Color.White,
+                titleContentColor = Color.White,
+                navigationIconContentColor = Color.White,
+                scrolledContainerColor = Color.Blue,
+            ),
+        )
+    }, content = { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+                    .fillMaxWidth()
+                    .padding(5.dp)
+
             ) {
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-
-                ) {
-                    TextField(value = tf.value, onValueChange = {
-                        tf.value = it
-                    })
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Button(
-                        modifier = Modifier
-                            .weight(2F)
-                            .height(60.dp),
-                        onClick = {
-                            if (tf.value.isNotEmpty()) {
-                                itemsList.add(tf.value)
-                                tf.value = ""
-                                writeToFile(itemsList, myContext)
-                                focusManager.clearFocus()
-                            } else {
-                                Toast.makeText(myContext, "Please enter something", Toast.LENGTH_SHORT).show()
-                            }
-                        }) {
-                        Text(text = "Add")
+                TextField(value = tf.value, onValueChange = {
+                    tf.value = it
+                })
+                Spacer(modifier = Modifier.width(5.dp))
+                Button(modifier = Modifier
+                    .weight(2F)
+                    .height(60.dp), onClick = {
+                    if (tf.value.isNotEmpty()) {
+                        itemsList.add(tf.value)
+                        tf.value = ""
+                        writeToFile(itemsList, myContext)
+                        focusManager.clearFocus()
+                    } else {
+                        Toast.makeText(myContext, "Please enter something", Toast.LENGTH_SHORT).show()
                     }
-                }
-
-                Spacer(modifier = Modifier.height(5.dp))
-                LazyColumn {
-                    items(
-                        count = itemsList.size,
-                        itemContent = { index ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(60.dp)
-                                    .padding(bottom = 5.dp, start = 5.dp, end = 5.dp),
-                                shape = RoundedCornerShape(0.dp),
-
-                                onClick = { /*TODO*/ }) {
-                                Row(
-                                    modifier = Modifier.padding(5.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        modifier = Modifier.weight(8F),
-                                        text = itemsList[index]
-                                    )
-                                    Row {
-
-                                        IconButton(
-                                            onClick = { /*TODO*/ }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = "Delete",
-                                                tint = Color.Red
-                                            )
-                                        }
-                                        IconButton(onClick = { /*TODO*/ }) {
-                                            Icon(
-                                                imageVector = Icons.Default.Edit,
-                                                contentDescription = "Edit",
-                                                tint = Color.Blue
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    )
+                }) {
+                    Text(text = "Add")
                 }
             }
 
+            Spacer(modifier = Modifier.height(5.dp))
+            LazyColumn {
+                items(count = itemsList.size, itemContent = { index ->
+                    Card(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .padding(bottom = 5.dp, start = 5.dp, end = 5.dp),
+                        shape = RoundedCornerShape(0.dp),
+
+                        onClick = { /*TODO*/ }) {
+                        Row(
+                            modifier = Modifier.padding(5.dp), verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(8F), text = itemsList[index]
+                            )
+                            Row {
+
+                                IconButton(onClick = {
+                                    deleteDialogStatus.value = true
+                                    selectedIndex.value = index
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red
+                                    )
+                                }
+                                IconButton(onClick = { /*TODO*/ }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color.Blue
+                                    )
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+
+
         }
-    )
+
+        if (deleteDialogStatus.value) {
+
+            AlertDialog(
+
+                title = { Text(text = "Delete") }, text = { Text(text = "Are you sure you want to delete this item?") },
+
+                onDismissRequest = {
+                    deleteDialogStatus.value = false
+
+                }, confirmButton = {
+                    TextButton(onClick = {
+                        itemsList.removeAt(selectedIndex.value)
+                        writeToFile(itemsList, myContext)
+                        deleteDialogStatus.value = false
+                    }) {
+                        Text(text = "YES")
+                    }
+                }, dismissButton = {
+                    TextButton(onClick = {
+                        deleteDialogStatus.value = false
+                    }) {
+                        Text(text = "NO")
+                    }
+                })
+
+        }
+    })
 }
 
 @Preview
