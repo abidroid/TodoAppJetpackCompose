@@ -48,15 +48,17 @@ fun MainScreen() {
     val itemsList = readData(myContext)
     val focusManager = LocalFocusManager.current
 
+    val selectedIndex = remember { mutableIntStateOf(0) }
+
     val deleteDialogStatus = remember {
         mutableStateOf(false)
     }
 
-    val editDialogStatus = remember {
+    val updateDialogStatus = remember {
         mutableStateOf(false)
     }
 
-    val selectedIndex = remember { mutableIntStateOf(0) }
+    val selectedItem = remember { mutableStateOf("") }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -128,7 +130,11 @@ fun MainScreen() {
                                         imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red
                                     )
                                 }
-                                IconButton(onClick = { /*TODO*/ }) {
+                                IconButton(onClick = {
+                                    updateDialogStatus.value = true
+                                    selectedItem.value = itemsList[index]
+                                    selectedIndex.value = index
+                                }) {
                                     Icon(
                                         imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color.Blue
                                     )
@@ -146,7 +152,8 @@ fun MainScreen() {
 
             AlertDialog(
 
-                title = { Text(text = "Delete") }, text = { Text(text = "Are you sure you want to delete this item?") },
+                title = { Text(text = "Delete") },
+                text = { Text(text = "Are you sure you want to delete this item?") },
 
                 onDismissRequest = {
                     deleteDialogStatus.value = false
@@ -162,6 +169,38 @@ fun MainScreen() {
                 }, dismissButton = {
                     TextButton(onClick = {
                         deleteDialogStatus.value = false
+                    }) {
+                        Text(text = "NO")
+                    }
+                })
+
+        }
+
+
+        if (updateDialogStatus.value) {
+
+            AlertDialog(
+
+                title = { Text(text = "Update") },
+                text = { TextField(value = selectedItem.value, onValueChange = {
+                    selectedItem.value = it
+                }) },
+
+                onDismissRequest = {
+                    updateDialogStatus.value = false
+
+                }, confirmButton = {
+                    TextButton(onClick = {
+                        itemsList[selectedIndex.value] = selectedItem.value
+                        writeToFile(itemsList, myContext)
+                        updateDialogStatus.value = false
+                        Toast.makeText(myContext, "item is updated", Toast.LENGTH_SHORT).show()
+                    }) {
+                        Text(text = "YES")
+                    }
+                }, dismissButton = {
+                    TextButton(onClick = {
+                        updateDialogStatus.value = false
                     }) {
                         Text(text = "NO")
                     }
