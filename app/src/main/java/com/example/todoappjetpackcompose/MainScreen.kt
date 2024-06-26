@@ -60,6 +60,10 @@ fun MainScreen() {
 
     val selectedItem = remember { mutableStateOf("") }
 
+    val textDialogStatus = remember {
+        mutableStateOf(false)
+    }
+
     Scaffold(topBar = {
         TopAppBar(
             title = { Text("Todo App") },
@@ -113,7 +117,10 @@ fun MainScreen() {
                         .padding(bottom = 5.dp, start = 5.dp, end = 5.dp),
                         shape = RoundedCornerShape(0.dp),
 
-                        onClick = { /*TODO*/ }) {
+                        onClick = {
+                            textDialogStatus.value = true
+                            selectedItem.value = itemsList[index]
+                        }) {
                         Row(
                             modifier = Modifier.padding(5.dp), verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -182,9 +189,11 @@ fun MainScreen() {
             AlertDialog(
 
                 title = { Text(text = "Update") },
-                text = { TextField(value = selectedItem.value, onValueChange = {
-                    selectedItem.value = it
-                }) },
+                text = {
+                    TextField(value = selectedItem.value, onValueChange = {
+                        selectedItem.value = it
+                    })
+                },
 
                 onDismissRequest = {
                     updateDialogStatus.value = false
@@ -205,7 +214,28 @@ fun MainScreen() {
                         Text(text = "NO")
                     }
                 })
+        }
 
+        if (textDialogStatus.value) {
+
+            AlertDialog(
+
+                title = { Text(text = "TODO Item") },
+                text = {
+                    Text(selectedItem.value)
+                },
+
+                onDismissRequest = {
+                    textDialogStatus.value = false
+
+                }, confirmButton = {
+                    TextButton(onClick = {
+
+                        textDialogStatus.value = false
+                    }) {
+                        Text(text = "CLOSE")
+                    }
+                })
         }
     })
 }
